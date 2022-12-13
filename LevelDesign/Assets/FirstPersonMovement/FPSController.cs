@@ -11,8 +11,8 @@ public class FPSController : MonoBehaviour
     [SerializeField] private float gravity = 30.0f;
 
     [Header("Look Parameters")]
-    [SerializeField, Range(1, 10)] private float lookSpeedx = 2.0f;
-    [SerializeField, Range(1, 10)] private float lookSpeedy = 2.0f;
+    [SerializeField, Range(1, 10)] private float lookSpeedX = 2.0f;
+    [SerializeField, Range(1, 10)] private float lookSpeedY = 2.0f;
     [SerializeField, Range(1, 180)] private float upperLookLimit = 80.0f;
     [SerializeField, Range(1, 180)] private float lowerLookLimit = 80.0f;
 
@@ -49,16 +49,26 @@ public class FPSController : MonoBehaviour
         currentInput = new Vector2(walkspeed * Input.GetAxis("Vertical"), walkspeed * Input.GetAxis("Horizontal"));
         
         float moveDirectionY = moveDirection.y;
-        moveDirection = (transfrom.TransformDirection(Vector3.forward) * currentInput.x) + (transfrom.TransformDirection(Vector3.right) * currentInput.y);
+        moveDirection = (transform.TransformDirection(Vector3.forward) * currentInput.x) + (transform.TransformDirection(Vector3.right) * currentInput.y);
+        moveDirection.y = moveDirectionY;
     }
 
     private void HandleLookInput ()
     {
-            
+        rotationX -= Input.GetAxis("Mouse Y") * lookSpeedY;
+        rotationX = Mathf.Clamp(rotationX, -upperLookLimit, lowerLookLimit);
+        playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
+        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeedX, 0);
     }
 
     private void ApplyFinalMovements ()
     {
-            
+        if(!characterController.isGrounded)
+        {
+            moveDirection.y -= gravity * Time.deltaTime;
+        }
+
+        characterController.Move(moveDirection * Time.deltaTime);
+
     }
 }
