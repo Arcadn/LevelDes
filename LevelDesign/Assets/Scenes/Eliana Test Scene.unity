@@ -463,8 +463,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ebbe7ad661be9f44ba4888728cd05bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkspeed: 2
-  gravity: 15
+  canSprint: 1
+  sprintKey: 304
+  walkSpeed: 2
+  sprintSpeed: 5
+  gravity: 10
   lookSpeedX: 1.5
   lookSpeedY: 1.5
   upperLookLimit: 80
