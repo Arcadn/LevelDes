@@ -15,38 +15,31 @@ public class Door : MonoBehaviour
     [SerializeField] private Vector3 direction;
 
 
-    public virtual void Awake()
+    void Start()
     {
         speed = 2;
         origin = transform.position;
         slideDistance = (GetComponent<Collider>().bounds.size).x;
         isOpen = false;
-        gameObject.layer = 3;
+        Open();
     }
 
-    private void OnFocus()
-    {
-        
-    }
-
-    public void OnInteract()
+    public void Open()
     {
         if (!isOpen)
         {
             opening = true;
             StartCoroutine(SlideGameObject());
         }
+    }
 
+    public void Close()
+    {
         if (isOpen)
         {
             opening = false;
             StartCoroutine(SlideGameObject());
         }
-    }
-
-    private void OnLostFocus() 
-    {
-        
     }
 
     private void MoveDoor()
