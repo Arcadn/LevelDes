@@ -61,6 +61,7 @@ public class Guard : MonoBehaviour
         if (playerVisibleTimer <= timeToSpotPlayer)
         {
             player = GameObject.FindGameObjectWithTag("Player").transform;
+            
             for (int i = 0; i < waypoints.Length; i++)
             {
                 waypoints[i] = pathHolder.GetChild(i).position;

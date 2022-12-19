@@ -56,7 +56,7 @@ public class FPSController : MonoBehaviour
 
     [Header("Vaulting Parameters")]
     [SerializeField] private float playerRadius = 0.5f;
-    [SerializeField] private LayerMask vaultLayer = default;
+    [SerializeField] private int vaultLayer = default;
 
     [Header("Headbob Parameters")]
     [SerializeField] private float walkBobSpeed = 14f;
@@ -106,11 +106,6 @@ public class FPSController : MonoBehaviour
                 HandleCrouch();
             }
 
-            if (canVault)
-            {
-                HandleVault();
-            }
-
             if (canUseHeadbob)
             {
                 HandleHeadbob();
@@ -129,6 +124,11 @@ public class FPSController : MonoBehaviour
 
             ApplyFinalMovements();
         }
+
+        if (canVault)
+            {
+                HandleVault();
+            }
         
     }
 
@@ -159,14 +159,15 @@ public class FPSController : MonoBehaviour
 
     private void HandleVault()
     {
-        if (IsInteracting)
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out var firstHit, 1f, vaultLayer))
+            Debug.Log("trying to vault");
+            if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out var firstHit, 2.5f, vaultLayer))
             {
-                print("vaultable in front");
-                if (Physics.Raycast(firstHit.point + (playerCamera.transform.forward * playerRadius) + (Vector3.up * 0.6f * standingHeight), Vector3.down, out var secondHit, standingHeight))
+                Debug.Log("vaultable in front");
+                if (Physics.Raycast(firstHit.point + (playerCamera.transform.forward * playerRadius) + (Vector3.up * 1f * standingHeight), Vector3.down, out var secondHit, standingHeight))
                 {
-                    print("found place to land");
+                    Debug.Log("found place to land");
                     StartCoroutine(LerpVault(secondHit.point, 0.5f));
                 }
             }

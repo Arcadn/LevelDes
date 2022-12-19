@@ -26,11 +26,13 @@ public class Door : MonoBehaviour
 
     public void OnFocus()
     {
-        
+        Debug.Log("Being looked at");
     }
 
     public void OnInteract()
     {
+        Debug.Log("Interacted with");
+
         if (!isOpen)
         {
             opening = true;
@@ -46,7 +48,7 @@ public class Door : MonoBehaviour
 
     public void OnLoseFocus() 
     {
-        
+        Debug.Log("Stopped being looked at");
     }
 
     private void MoveDoor()
