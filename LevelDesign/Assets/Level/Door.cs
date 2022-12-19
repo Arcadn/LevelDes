@@ -8,15 +8,20 @@ public class Door : MonoBehaviour
     [SerializeField] float speed;
 
     private Vector3 origin;
-    private float slideDistance;
+    private float slideDistance = 1;
     private bool isOpen;
     private bool opening;
 
+    [SerializeField] private Vector3 direction;
+
+
     void Start()
     {
+        speed = 2;
         origin = transform.position;
-        slideDistance = (transform.rotation * GetComponent<Collider>().bounds.size).x;
+        slideDistance = (GetComponent<Collider>().bounds.size).x;
         isOpen = false;
+        Open();
     }
 
     public void Open()
@@ -39,17 +44,14 @@ public class Door : MonoBehaviour
 
     private void MoveDoor()
     {
-        Vector3 direction;
         Vector3 goal;
 
         if (opening)
         {
-            direction = transform.rotation * transform.right;
-            goal = origin - slideDistance * transform.right;
+            goal = origin - slideDistance * direction;
         }
         else
         {
-            direction = transform.rotation * -transform.right;
             goal = origin;
         }
 

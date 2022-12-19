@@ -42,7 +42,7 @@ public class FPSController : MonoBehaviour
     public static Action<float> OnStaminaChange;
 
     [Header("Crouch Parameters")]
-    [SerializeField, Range(1, 10)] private float crouchHeight = 0.5f;
+    [SerializeField, Range(1, 10)] private float crouchHeight = 0.4f;
     [SerializeField, Range(1, 10)] private float standingHeight = 2f;
     [SerializeField, Range(1, 10)] private float timeToCrouch = 0.25f;
     [SerializeField, Range(1, 10)] private Vector3 crouchingCenter = new Vector3(0,0.5f,0);

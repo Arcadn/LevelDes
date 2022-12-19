@@ -1099,6 +1099,7 @@ GameObject:
   - component: {fileID: 1042300900}
   - component: {fileID: 1042300899}
   - component: {fileID: 1042300898}
+  - component: {fileID: 1042300901}
   m_Layer: 0
   m_Name: Door.009 (2)
   m_TagString: Untagged
@@ -1184,6 +1185,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1042300896}
   m_Mesh: {fileID: 4256850970830407833, guid: 20ef4f7630bd5bc469c65c2fe747d851, type: 3}
+--- !u!114 &1042300901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1042300896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a2147484113f1542aa545f4fa1b0689, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 2
 --- !u!1001 &1053870761
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1191,6 +1205,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 8297082106842288562, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
+      propertyPath: sprintSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8297082106842288562, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
+      propertyPath: standingHeight
+      value: 1.75
+      objectReference: {fileID: 0}
     - target: {fileID: 8297082106842288563, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
       propertyPath: m_Name
       value: FirstPersonController
@@ -1238,6 +1260,10 @@ PrefabInstance:
     - target: {fileID: 8297082106842288572, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8297082106842288573, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
+      propertyPath: m_Radius
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 724288d286fed8f4ca3f2ca7346700ac, type: 3}
@@ -1532,7 +1558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a2147484113f1542aa545f4fa1b0689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
+  speed: 3
 --- !u!65 &1738765718
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1615,7 +1641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a2147484113f1542aa545f4fa1b0689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
+  speed: 5
 --- !u!65 &1905629971
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1641,7 +1667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a2147484113f1542aa545f4fa1b0689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
+  speed: 1
 --- !u!65 &1929327936
 BoxCollider:
   m_ObjectHideFlags: 0
