@@ -8,16 +8,20 @@ public class FPSController : MonoBehaviour
     public bool CanMove { get; private set;} = true;
     private bool IsSprinting => canSprint && Input.GetKey(sprintKey);
     private bool ShouldCrouch => Input.GetKeyDown(crouchKey) && !duringCrouchAnimation && characterController.isGrounded;
+    private bool IsInteracting => canInteract && Input.GetKey(interactKey);
 
     [Header("Functional Options")]
     [SerializeField] private bool canSprint = true;
     [SerializeField] private bool canCrouch = true;
     [SerializeField] private bool canUseHeadbob = true;
     [SerializeField] private bool useStamina = true;
+    [SerializeField] private bool canVault = true;
+    [SerializeField] private bool canInteract = true;
 
     [Header ("Controls")]
     [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
     [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
+    [SerializeField] private KeyCode interactKey = KeyCode.Space;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 3.0f;
@@ -42,13 +46,17 @@ public class FPSController : MonoBehaviour
     public static Action<float> OnStaminaChange;
 
     [Header("Crouch Parameters")]
-    [SerializeField, Range(1, 10)] private float crouchHeight = 0.4f;
-    [SerializeField, Range(1, 10)] private float standingHeight = 2f;
-    [SerializeField, Range(1, 10)] private float timeToCrouch = 0.25f;
-    [SerializeField, Range(1, 10)] private Vector3 crouchingCenter = new Vector3(0,0.5f,0);
-    [SerializeField, Range(1, 10)] private Vector3 standingCenter = new Vector3(0,0,0);
+    [SerializeField] private float crouchHeight = 0.4f;
+    [SerializeField] private float standingHeight = 2f;
+    [SerializeField] private float timeToCrouch = 0.25f;
+    [SerializeField] private Vector3 crouchingCenter = new Vector3(0,0.5f,0);
+    [SerializeField] private Vector3 standingCenter = new Vector3(0,0,0);
     private bool isCrouching;
     private bool duringCrouchAnimation;
+
+    [Header("Vaulting Parameters")]
+    [SerializeField] private float playerRadius = 0.5f;
+    [SerializeField] private LayerMask vaultLayer = default;
 
     [Header("Headbob Parameters")]
     [SerializeField] private float walkBobSpeed = 14f;
@@ -59,6 +67,12 @@ public class FPSController : MonoBehaviour
     [SerializeField] private float crouchBobAmount = 0.025f;
     private float defaultYPos = 0;
     private float timer;
+
+    [Header("Interaction")]
+    [SerializeField] private Vector3 interactionRaypoint = default;
+    [SerializeField] private float interactionDistance = default;
+    [SerializeField] private LayerMask interactionLayer = default;
+    private Door currentDoor;
 
     private Camera playerCamera;
     private CharacterController characterController;
@@ -76,6 +90,8 @@ public class FPSController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         currentStamina = maxStamina;
+        vaultLayer = LayerMask.NameToLayer("VaultLayer");
+        vaultLayer = ~vaultLayer;
     }
 
     void Update()
@@ -90,6 +106,11 @@ public class FPSController : MonoBehaviour
                 HandleCrouch();
             }
 
+            if (canVault)
+            {
+                HandleVault();
+            }
+
             if (canUseHeadbob)
             {
                 HandleHeadbob();
@@ -98,6 +119,12 @@ public class FPSController : MonoBehaviour
             if (useStamina)
             {
                 HandleStamina();
+            }
+
+            if (canInteract)
+            {
+                HandleInteractionCheck();
+                HandleInteractionInput();
             }
 
             ApplyFinalMovements();
@@ -130,6 +157,23 @@ public class FPSController : MonoBehaviour
         }
     }
 
+    private void HandleVault()
+    {
+        if (IsInteracting)
+        {
+            if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out var firstHit, 1f, vaultLayer))
+            {
+                print("vaultable in front");
+                if (Physics.Raycast(firstHit.point + (playerCamera.transform.forward * playerRadius) + (Vector3.up * 0.6f * standingHeight), Vector3.down, out var secondHit, standingHeight))
+                {
+                    print("found place to land");
+                    StartCoroutine(LerpVault(secondHit.point, 0.5f));
+                }
+            }
+        }
+
+    }
+
     private void HandleHeadbob()
     {
         if (!characterController.isGrounded)
@@ -151,7 +195,7 @@ public class FPSController : MonoBehaviour
 
     private void HandleStamina()
     {
-        if (IsSprinting && currentInput != Vector3.zero)
+        if (IsSprinting && currentInput != Vector3.zero && !isCrouching)
         {
             if (regeneratingStamina != null)
             {
@@ -215,7 +259,36 @@ public class FPSController : MonoBehaviour
         }
 
         characterController.Move(moveDirection * Time.deltaTime);
+    }
 
+    private void HandleInteractionCheck()
+    {
+        if (Physics.Reycast(playerCamera.ViewportPointToRay(interactionRaypoint)), out Raycast hit, interactionDistance)
+        {
+            if (hit.collider.gameObject.layer == 3 && (currentInteractable == null || hit.collider.gameObject.GetInstanceID() != currentInteractable.GetInstanceID()))
+            {
+                hit.collider.TryGetComponent(out currentInteractable);
+
+                if (currentInteractable)
+                {
+                    currentInteractable.OnFocus();
+                }
+            }
+
+            else if (currentInteractable)
+            {
+                currentInteractable.OnLoseFocus();
+                currentInteractable = null;
+            }
+        }
+    }
+    
+    private void HandleInteractionInput()
+    {
+        if (IsInteracting && currentInteractable 1= null && Physics.Raycast(playerCamera.ViewportPointToRay(interactionRaypoint)), out Raycast hit, interactionDistance, interactionLayer)
+        {
+            currentInteractable.OnInteract();
+        }
     }
 
     private IEnumerator CrouchStand()
@@ -233,6 +306,8 @@ public class FPSController : MonoBehaviour
         Vector3 targetCenter = isCrouching ? standingCenter : crouchingCenter;
         Vector3 currentCenter = characterController.center;
 
+        canVault = isCrouching ? false : true;
+
         while(timeElapsed < timeToCrouch)
         {
             characterController.height = Mathf.Lerp(currentHeight, targetHeight, timeElapsed/timeToCrouch);
@@ -247,5 +322,19 @@ public class FPSController : MonoBehaviour
         isCrouching = !isCrouching;
 
         duringCrouchAnimation = false;
+    }
+
+    private IEnumerator LerpVault(Vector3 targetPosition, float duration)
+    {
+        float time = 0;
+        Vector3 startPosition = transform.position;
+
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = targetPosition;
     }
 }
