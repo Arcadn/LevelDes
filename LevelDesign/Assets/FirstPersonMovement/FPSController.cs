@@ -56,7 +56,7 @@ public class FPSController : MonoBehaviour
 
     [Header("Vaulting Parameters")]
     [SerializeField] private float playerRadius = 0.5f;
-    [SerializeField] private int vaultLayer = default;
+    [SerializeField] private LayerMask vaultLayer = default;
 
     [Header("Headbob Parameters")]
     [SerializeField] private float walkBobSpeed = 14f;
@@ -90,8 +90,6 @@ public class FPSController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         currentStamina = maxStamina;
-        vaultLayer = LayerMask.NameToLayer("VaultLayer");
-        vaultLayer = ~vaultLayer;
     }
 
     void Update()
@@ -159,13 +157,13 @@ public class FPSController : MonoBehaviour
 
     private void HandleVault()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (IsInteracting)
         {
             Debug.Log("trying to vault");
             if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out var firstHit, 2.5f, vaultLayer))
             {
                 Debug.Log("vaultable in front");
-                if (Physics.Raycast(firstHit.point + (playerCamera.transform.forward * playerRadius) + (Vector3.up * 1f * standingHeight), Vector3.down, out var secondHit, standingHeight))
+                if (Physics.Raycast(firstHit.point + (playerCamera.transform.forward * playerRadius) + (Vector3.up * 1f * standingHeight), Vector3.down, out var secondHit, standingHeight + 0.5f))
                 {
                     Debug.Log("found place to land");
                     StartCoroutine(LerpVault(secondHit.point, 0.5f));
