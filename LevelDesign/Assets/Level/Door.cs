@@ -48,7 +48,7 @@ public class Door : MonoBehaviour
 
         if (opening)
         {
-            goal = origin - slideDistance * direction;
+            goal = origin + slideDistance * direction;
         }
         else
         {
