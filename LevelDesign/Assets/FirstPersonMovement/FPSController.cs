@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class FPSController : MonoBehaviour
@@ -12,6 +13,7 @@ public class FPSController : MonoBehaviour
     [SerializeField] private bool canSprint = true;
     [SerializeField] private bool canCrouch = true;
     [SerializeField] private bool canUseHeadbob = true;
+    [SerializeField] private bool useStamina = true;
 
     [Header ("Controls")]
     [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
@@ -28,6 +30,16 @@ public class FPSController : MonoBehaviour
     [SerializeField, Range(1, 10)] private float lookSpeedY = 2.0f;
     [SerializeField, Range(1, 180)] private float upperLookLimit = 80.0f;
     [SerializeField, Range(1, 180)] private float lowerLookLimit = 80.0f;
+
+    [Header("Stamina Parameters")]
+    [SerializeField] private float maxStamina = 100;
+    [SerializeField] private float staminaUseMultiplier = 5;
+    [SerializeField] private float timeBeforeStaminaRegen = 5;
+    [SerializeField] private float staminaValueIncrement = 2;
+    [SerializeField] private float staminaTimeIncrement = 1;
+    private float currentStamina;
+    private Coroutine regeneratingStamina;
+    public static Action<float> OnStaminaChange;
 
     [Header("Crouch Parameters")]
     [SerializeField, Range(1, 10)] private float crouchHeight = 0.5f;
@@ -63,6 +75,7 @@ public class FPSController : MonoBehaviour
         defaultYPos = playerCamera.transform.localPosition.y;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        currentStamina = maxStamina;
     }
 
     void Update()
@@ -80,6 +93,11 @@ public class FPSController : MonoBehaviour
             if (canUseHeadbob)
             {
                 HandleHeadbob();
+            }
+
+            if (useStamina)
+            {
+                HandleStamina();
             }
 
             ApplyFinalMovements();
@@ -122,12 +140,71 @@ public class FPSController : MonoBehaviour
         if (Mathf.Abs(moveDirection.x) > 0.1 || Mathf.Abs(moveDirection.y) > 0.1)
         {
             timer += Time.deltaTime * (isCrouching ? crouchBobSpeed : IsSprinting ? sprintBobSpeed : walkBobSpeed);
-            playerCamera.transform.localPosition = new Vector3(
+            playerCamera.transform.localPosition = new Vector3
+            (
                 playerCamera.transform.localPosition.x,
                 defaultYPos + Mathf.Sin(timer) * (isCrouching ? crouchBobAmount : IsSprinting ? sprintBobAmount : walkBobAmount),
                 playerCamera.transform.localPosition.z
             );
         }
+    }
+
+    private void HandleStamina()
+    {
+        if (IsSprinting && currentInput != Vector3.zero)
+        {
+            if (regeneratingStamina != null)
+            {
+                StopCoroutine(regeneratingStamina);
+                regeneratingStamina = null;
+            }
+
+            currentStamina -= staminaUseMultiplier * Time.deltaTime;
+
+            if (currentStamina < 0)
+            {
+                currentStamina = 0;
+            }
+
+            OnStaminaChange?.Invoke(currentStamina);
+
+            if (currentStamina <= 0)
+            {
+                canSprint = false;
+            }
+        }
+
+        if (!IsSprinting && currentStamina < maxStamina && regeneratingStamina == null)
+        {
+            regeneratingStamina = StartCoroutine(RegenerateStamina());
+        }
+    }
+
+    private IEnumerator RegenerateStamina()
+    {
+        yield return new WaitForSeconds(timeBeforeStaminaRegen);
+        WaitForSeconds timeToWait = new WaitForSeconds(staminaTimeIncrement);
+
+        while (currentStamina < maxStamina)
+        {
+            if (currentStamina > 0)
+            {
+                canSprint = true;
+            }
+
+            currentStamina += staminaValueIncrement;
+
+            if (currentStamina > maxStamina)
+            {
+                currentStamina = maxStamina;
+            }
+
+            OnStaminaChange?.Invoke(currentStamina);
+
+            yield return timeToWait;
+        }
+
+        regeneratingStamina = null;
     }
 
     private void ApplyFinalMovements ()
