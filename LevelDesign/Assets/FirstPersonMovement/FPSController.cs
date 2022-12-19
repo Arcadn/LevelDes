@@ -263,31 +263,31 @@ public class FPSController : MonoBehaviour
 
     private void HandleInteractionCheck()
     {
-        if (Physics.Reycast(playerCamera.ViewportPointToRay(interactionRaypoint)), out Raycast hit, interactionDistance)
+        if (Physics.Raycast(playerCamera.ViewportPointToRay(interactionRaypoint), out RaycastHit hit, interactionDistance))
         {
-            if (hit.collider.gameObject.layer == 3 && (currentInteractable == null || hit.collider.gameObject.GetInstanceID() != currentInteractable.GetInstanceID()))
+            if ((hit.collider.gameObject.layer == 3) && (currentDoor == null || hit.collider.gameObject.GetInstanceID() != currentDoor.GetInstanceID()))
             {
-                hit.collider.TryGetComponent(out currentInteractable);
+                hit.collider.TryGetComponent(out currentDoor);
 
-                if (currentInteractable)
+                if (currentDoor)
                 {
-                    currentInteractable.OnFocus();
+                    currentDoor.OnFocus();
                 }
             }
 
-            else if (currentInteractable)
+            else if (currentDoor)
             {
-                currentInteractable.OnLoseFocus();
-                currentInteractable = null;
+                currentDoor.OnLoseFocus();
+                currentDoor = null;
             }
         }
     }
     
     private void HandleInteractionInput()
     {
-        if (IsInteracting && currentInteractable 1= null && Physics.Raycast(playerCamera.ViewportPointToRay(interactionRaypoint)), out Raycast hit, interactionDistance, interactionLayer)
+        if (IsInteracting && currentDoor != null && Physics.Raycast(playerCamera.ViewportPointToRay(interactionRaypoint), out RaycastHit hit, interactionDistance, interactionLayer))
         {
-            currentInteractable.OnInteract();
+            currentDoor.OnInteract();
         }
     }
 

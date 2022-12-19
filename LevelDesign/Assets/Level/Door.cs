@@ -24,7 +24,7 @@ public class Door : MonoBehaviour
         gameObject.layer = 3;
     }
 
-    private void OnFocus()
+    public void OnFocus()
     {
         
     }
@@ -44,7 +44,7 @@ public class Door : MonoBehaviour
         }
     }
 
-    private void OnLostFocus() 
+    public void OnLoseFocus() 
     {
         
     }

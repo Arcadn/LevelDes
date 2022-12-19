@@ -35,7 +35,7 @@ public class Guard : MonoBehaviour
     private float viewAngle;
 
     // Guard Spot Variables
-    public float playerVisibleTimer;
+    private float playerVisibleTimer;
     public float timeToSpotPlayer;
 
     public float ChangeDelay = 0.2f;
@@ -81,7 +81,6 @@ public class Guard : MonoBehaviour
 
                 if (CanSeePlayer())
                 {
-                    Debug.Log("Guard says: I see you!");
                     playerVisibleTimer += Time.deltaTime;
                 }
                 else
@@ -100,11 +99,13 @@ public class Guard : MonoBehaviour
                         OnGuardHasSpottedPlayer();
                     }
                 }
-
                 break;
+
             case State.ChaseTarget:
                 spotlight.color = Color.red;
                 
+                Debug.Log("Guard says: I see you!");
+
                 StopAllCoroutines();
                 
 
@@ -117,6 +118,7 @@ public class Guard : MonoBehaviour
                     state = State.StopChasing;
                 }
                 break;
+
             case State.StopChasing:
                 // Guard sight: using the spotlight angle as field of vision.
                 viewAngle = spotlight.spotAngle;
